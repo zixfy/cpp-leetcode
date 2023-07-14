@@ -108,16 +108,31 @@ std::ostream &operator<<(std::ostream &o, const std::array<T, N> &v) {
 }
 
 // leetcode submit region begin(Prohibit modification and deletion)
+template <typename... Args, typename T> auto maxx(T fa, Args... args) {
+  if constexpr (sizeof...(args) == 0)
+    return fa;
+  else
+    return max(fa, maxx(args...));
+}
+template <typename... Args, typename T> auto print(T fa, Args... args) {
+  cout << fa << ", ";
+  if constexpr (sizeof...(args) > 0)
+    print(args...);
+  cout << endl;
+}
 class Solution {
 public:
   int unSuitability(vector<int> &operate) {
-    auto f = [&operate](int i, int j) { return 0; };
+    int ans = 0;
     const auto n = operate.size();
-    vector dp(n, 0);
-    dp[0] = operate[0];
-    for (int i = 1; i < n; ++i) {
-
+    int min_pos=0, max_neg=0;
+    for (auto o : operate) {
+      auto t1 = min_pos - o, t2 = max_neg + o;
+      min_pos = max(min_pos, t2);
+      max_neg = min(max_neg, t1);
+      ans = max(ans, max(min_pos, -max_neg));
     }
+    return ans;
   }
 };
 // leetcode submit region end(Prohibit modification and deletion)

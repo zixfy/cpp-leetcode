@@ -47,7 +47,8 @@
 //
 // Related Topics 字典树 数组 哈希表 字符串 👍 41 👎 0
 
-
+#include "bits/stdc++.h"
+using namespace std;
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:

@@ -48,12 +48,13 @@
 //
 // Related Topics 树状数组 数组 动态规划 👍 127 👎 0
 
-
+#include "bits/stdc++.h"
+using namespace std;
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:
     int numTeams(vector<int>& rating) {
-
+      const auto n = rating.size();
     }
 };
 //leetcode submit region end(Prohibit modification and deletion)

@@ -112,9 +112,34 @@ std::ostream &operator<<(std::ostream &o, const std::array<T, N> &v) {
  * };
  */
 class Solution {
+  using memmap = unordered_map<TreeNode *, int>;
+
+private:
+  int _get_tree_size(TreeNode *t, memmap &dict) {
+    if (t == nullptr)
+      return 0;
+    if (dict.count(t) == 0)
+      dict[t] =
+          1 + _get_tree_size(t->left, dict) + _get_tree_size(t->right, dict);
+    return dict[t];
+  }
+  bool _check(TreeNode *t1, TreeNode *t2, memmap &dict) {
+
+    auto s1 = _get_tree_size(t1, dict), s2 = _get_tree_size(t2, dict);
+    if (s1 > s2)
+      return _check(t1->left, t2, dict) || _check(t1->right, t2, dict);
+    if (s1 < s2)
+      return false;
+    if (s1 == 0)
+      return true;
+    return (t1->val == t2->val) && _check(t1->left, t2->left, dict) &&
+           _check(t1->right, t2->right, dict);
+  }
+
 public:
   bool checkSubTree(TreeNode *t1, TreeNode *t2) {
-
+    unordered_map<TreeNode *, int> cached_size;
+    return _check(t1, t2, cached_size);
   }
 };
 // leetcode submit region end(Prohibit modification and deletion)
