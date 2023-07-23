@@ -52,53 +52,116 @@
 #include <bits/stdc++.h>
 using namespace std;
 // leetcode submit region begin(Prohibit modification and deletion)
-
-#include <vector>
-template <typename T> class BITree {
-public:
-  BITree() = delete;
-  BITree(const std::vector<T> a) : _n(a.size()) {
-    _pre.resize(_n + 1, T());
-    for (auto i = 1; i <= _n; ++i) {
-      _pre[i] += a[i - 1];
-      int j = i + low_bit(i);
-      if (j <= _n)
-        _pre[j] += _pre[i];
-    }
+template <typename... T> void print(T... t) {
+  ((cout << t << ", "), ..., (cout << endl));
+}
+#include <bits/stdc++.h>
+#include <bits/stdc++.h>
+using namespace std;
+template <typename T> struct BasicSegTreeNode {
+  using DataType = T;
+  using p_node = BasicSegTreeNode<T> *;
+  BasicSegTreeNode(size_t l, size_t r, DataType d)
+      : data(d), left_bound(l), right_bound(r), right_child(nullptr),
+        left_child(nullptr), lazy{} {};
+  BasicSegTreeNode(size_t l, size_t r) : BasicSegTreeNode(l, r, DataType{}){};
+  void push_down() {
+    if (!lazy)
+      return;
+    left_child->lazy_inc(lazy);
+    right_child->lazy_inc(lazy);
+    lazy = DataType{};
   }
-  void add(int x, const T& k) {
-    x += 1;
-    while (x <= _n) { // 不能越界
-      _pre[x] = _pre[x] + k;
-      x = x + low_bit(x);
-    }
+  void pull_up() { data = left_child->data + right_child->data; }
+  void lazy_inc(DataType inc) {
+    lazy += inc;
+    data += inc * (right_bound - left_bound + 1);
   }
-  T get(int l, int r) { return get_sum(r + 1) - get_sum(l); }
+  bool within(size_t ql, size_t qr) const {
+    return ql <= left_bound && right_bound <= qr;
+  }
+  bool overlap(size_t ql, size_t qr) const {
+    return !(ql > right_bound || qr < left_bound);
+  }
+  DataType val() { return data; }
+  decltype(auto) left() { return *left_child; }
+  decltype(auto) right() { return *right_child; }
+  void set_child(BasicSegTreeNode<T> &l, BasicSegTreeNode<T> &r) {
+    left_child = &l, right_child = &r;
+  }
 
 private:
-  inline int low_bit(int x) { return x & -x; }
-  T get_sum(int x) {  // a[1]..a[x]的和
-    T ans{};
-    while (x > 0) {
-      ans += _pre[x];
-      x = x - low_bit(x);
-    }
-    return ans;
+  p_node left_child, right_child;
+  size_t left_bound, right_bound;
+  DataType data, lazy;
+};
+template <typename T = int> class SegTree {
+  using Node = BasicSegTreeNode<T>;
+  vector<Node> tree;
+  std::reference_wrapper<const vector<T>> arr;
+
+public:
+  explicit SegTree(const vector<T> &v) : arr(v) {
+    int n = arr.get().size();
+    tree.reserve(n << 1);
+    _build(0, n - 1);
   }
-  std::vector<T> _pre;
-  std::size_t _n;
+  SegTree() = delete;
+  T range_sum(int l, int r) { return _range_query(l, r, tree.front()); }
+  void range_add(int l, int r, int val) {
+    _range_modify(l, r, val, tree.front());
+  }
+
+private:
+  T _range_query(int ql, int qr, Node &cur) {
+    if (!cur.overlap(ql, qr))
+      return {};
+    if (cur.within(ql, qr))
+      return cur.val();
+    cur.push_down();
+    return _range_query(ql, qr, cur.left()) + _range_query(ql, qr, cur.right());
+  }
+
+  void _range_modify(int ql, int qr, T val, Node &cur) {
+    if (!cur.overlap(ql, qr))
+      return;
+    if (cur.within(ql, qr)) {
+      cur.lazy_inc(val);
+      return;
+    }
+    cur.push_down();
+    _range_modify(ql, qr, val, cur.left());
+    _range_modify(ql, qr, val, cur.right());
+    cur.pull_up();
+  }
+
+  Node &_build(size_t l, size_t r) {
+    if (l == r) {
+      tree.emplace_back(l, r, arr.get()[l]);
+      return tree.back();
+    }
+    tree.emplace_back(l, r);
+    auto &ret = tree.back();
+    auto m = l + ((r - l) >> 1);
+    ret.set_child(_build(l, m), _build(m + 1, r));
+    ret.pull_up();
+    return ret;
+  }
 };
 class NumArray {
 private:
-  BITree<int> bit;
+  SegTree<int>  bit;
 
 public:
-  NumArray(vector<int> &nums) : bit(nums) {
+  NumArray(vector<int> &nums) : bit(nums) {}
+
+  void update(int index, int val) {
+    bit.range_add(index, index, val - bit.range_sum(index, index));
   }
 
-  void update(int index, int val) { bit.add(index, val - bit.get(index, index)); }
-
-  int sumRange(int left, int right) {return bit.get(left, right); }
+  int sumRange(int left, int right) {
+    return bit.range_sum(left, right);
+  }
 };
 
 /**

@@ -29,6 +29,7 @@
 
 
 //leetcode submit region begin(Prohibit modification and deletion)
+constexpr auto MOD = 1337;
 class Solution {
 public:
     int largestPalindrome(int n) {

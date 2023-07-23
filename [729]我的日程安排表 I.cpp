@@ -55,7 +55,7 @@ class SegTree {
   vector<T>& arr;
   int n, root, n4, end;
 
-  void maintain(int cl, int cr, int p) {
+  void push_down(int cl, int cr, int p) {
     int cm = cl + (cr - cl) / 2;
     if (cl != cr && lazy[p]) {
       lazy[p * 2] += lazy[p];
@@ -86,7 +86,6 @@ class SegTree {
     maintain(cl, cr, p);
     if (l <= m) range_add(l, r, val, cl, m, p * 2);
     if (r > m) range_add(l, r, val, m + 1, cr, p * 2 + 1);
-    tree[p] = tree[p * 2] + tree[p * 2 + 1];
   }
 
   void build(int s, int t, int p) {

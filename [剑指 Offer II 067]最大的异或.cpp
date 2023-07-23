@@ -37,11 +37,12 @@
 //
 // Related Topics 位运算 字典树 数组 哈希表 👍 71 👎 0
 
+#include <bits/stdc++.h>
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:
-    int findMaximumXOR(vector<int>& nums) {
+    int findMaximumXOR(std::vector<int>& nums) {
 
     }
 };
