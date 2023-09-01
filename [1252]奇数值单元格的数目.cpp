@@ -64,9 +64,13 @@ public:
   int oddCells(int m, int n, vector<vector<int>> &indices) {
     using mapy = std::unordered_map<int, int>;
     mapy row_cnt, col_cnt;
-    for (auto const & ind: indices)
+    for (auto const &ind : indices)
       row_cnt[ind[0]]++, col_cnt[ind[1]]++;
-    auto odd_r = std::count_if(row_cnt.begin(), row_cnt.end(), )
+    auto odd_r = std::count_if(row_cnt.begin(), row_cnt.end(),
+                               [](auto const &p) { return p.second & 1; });
+    auto odd_c = std::count_if(col_cnt.begin(), col_cnt.end(),
+                               [](auto const &p) { return p.second & 1; });
+    return odd_r * n + odd_c * m - odd_r * odd_c * 2;
   }
 };
 // leetcode submit region end(Prohibit modification and deletion)

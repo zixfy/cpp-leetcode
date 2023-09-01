@@ -47,6 +47,8 @@
 #include <bits/stdc++.h>
 
 //leetcode submit region begin(Prohibit modification and deletion)
+using namespace std;
+namespace fs = std::filesystem;
 class Solution {
 public:
     vector<int> productQueries(int n, vector<vector<int>>& queries) {

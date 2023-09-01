@@ -59,32 +59,73 @@
 
 // leetcode submit region begin(Prohibit modification and deletion)
 using namespace std;
+
+namespace std {
+    namespace {
+
+        template<class T>
+        inline void hash_combine(std::size_t &seed, T const &v) {
+            seed ^= hash<T>()(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+        }
+
+// Recursive template code derived from Matthieu M.
+        template<class Tuple, size_t Index = std::tuple_size<Tuple>::value - 1>
+        struct HashValueImpl {
+            static void apply(size_t &seed, Tuple const &tuple) {
+                HashValueImpl<Tuple, Index - 1>::apply(seed, tuple);
+                hash_combine(seed, get<Index>(tuple));
+            }
+        };
+
+        template<class Tuple>
+        struct HashValueImpl<Tuple, 0> {
+            static void apply(size_t &seed, Tuple const &tuple) {
+                hash_combine(seed, get<0>(tuple));
+            }
+        };
+    } // namespace
+
+    template<typename U, typename V>
+    struct hash<std::pair<U, V>> {
+        size_t operator()(std::pair<U, V> const &tt) const {
+            size_t seed = 0;
+            hash_combine(seed, tt.first);
+            hash_combine(seed, tt.second);
+            return seed;
+        }
+    };
+
+} // namespace std
 class Solution {
 public:
-  bool validSquare(vector<int> &p1, vector<int> &p2, vector<int> &p3,
-                   vector<int> &p4) {
-    using xy = std::pair<int, int>;
-    vector<xy> points{
-        {p1[0], p1[1]}, {p2[0], p2[1]}, {p3[0], p3[1]}, {p4[0], p4[1]}};
-    auto cp = points.front();
-    auto dis = [](xy const &a, xy const &b) {
-      return (a.first - b.first) * (a.first - b.first) +
-             (a.second - b.second) * (a.second - b.second);
-    };
-    std::sort(points.begin(), points.end(),
-              [cp, dis](xy const &a, xy const &b) {
-                return dis(a, cp) < dis(b, cp);
-              });
-    auto const &far = points[3];
-    auto const &mid1 = points[1];
-    auto const &mid2 = points[2];
-    auto lsq = dis(mid1, cp);
-    if (lsq == 0)
-      return 0;
-    return lsq == dis(mid2, cp) && lsq == dis(mid1, far) &&
-           lsq == dis(mid2, far) && 2 * lsq == dis(mid1, mid2) &&
-           2 * lsq == dis(cp, far);
-  }
-  double minAreaFreeRect(vector<vector<int>> &points) {}
+    double minAreaFreeRect(vector<vector<int>> &points) {
+        using i64 = int64_t;
+        double ans = i64(numeric_limits<int>::max()) * 2;
+        using xy = pair<int, int>;
+        unordered_set<xy> pts;
+        for (auto const &p: points)
+            pts.emplace(p[0], p[1]);
+        auto n = points.size();
+        auto dis = [](int x1, int x2, int y1, int y2) {
+            return i64(x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2);
+        };
+        for (int i = 0; i < n; ++i)
+            for (int j = 0; j < n; ++j)
+                for (int k = 0; k < n; ++k)
+                    if (i != j && i != k && j != k) {
+                        if ((points[j][0] - points[i][0]) * (points[k][0] - points[i][0]) !=
+                            -(points[k][1] - points[i][1]) * (points[j][1] - points[i][1]))
+                            continue;
+                        auto area = dis(points[i][0], points[j][0], points[i][1], points[j][1]);
+                        auto area2 = dis(points[i][0], points[k][0], points[i][1], points[k][1]);
+
+                        if (pts.count({points[j][0] + points[k][0] - points[i][0],
+                                       points[j][1] + points[k][1] - points[i][1]})) {
+                            ans = min(ans, sqrt(area) * sqrt(area2));
+                        }
+                    }
+
+        return ans > numeric_limits<int>::max() ? 0 : ans;
+    }
 };
 // leetcode submit region end(Prohibit modification and deletion)

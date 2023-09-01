@@ -59,26 +59,43 @@
 
 
 //leetcode submit region begin(Prohibit modification and deletion)
+#include <thread>
+#include <functional>
+#include <mutex>
+#include <condition_variable>
+
+using namespace std;
+
 class Foo {
+    mutex m1, m2;
+    condition_variable cv1, cv2;
+    int order = 0;
 public:
     Foo() {
-        
+
     }
 
     void first(function<void()> printFirst) {
-        
+
         // printFirst() outputs "first". Do not change or remove this line.
         printFirst();
+        order = 1;
+        cv1.notify_one();
     }
 
     void second(function<void()> printSecond) {
-        
+        unique_lock g(m1);
+        cv1.wait(g, [this](){return order == 1;});
         // printSecond() outputs "second". Do not change or remove this line.
         printSecond();
+        order = 2;
+        cv2.notify_one();
     }
 
     void third(function<void()> printThird) {
-        
+
+        unique_lock g(m2);
+        cv2.wait(g,  [this](){return order == 2;});
         // printThird() outputs "third". Do not change or remove this line.
         printThird();
     }

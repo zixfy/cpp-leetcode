@@ -50,9 +50,29 @@
 using namespace std;
 
 // leetcode submit region begin(Prohibit modification and deletion)
+constexpr int MOD = 1e9 + 7;
+using i64 = long long;
 class Solution {
+
 public:
   int rearrangeSticks(int n, int k) {
+    vector dp(n + 1, vector(k + 1, i64(0)));
+    vector frac(n, i64(1));
+    for (int i = 1; i < n ;++i)
+      frac[i] = frac[i - 1] * (n - i);
+    for (int i = 0; i <= k ;++i)
+      dp[0][i] = 1;
+    dp[1][1] = 1;
+    for (int i = 2; i <= n; ++i) {
+      dp[i][1] =
+      for (int j = 2; j <= min(i, k); ++j)
+        for (int l = j - 1; l < i; ++l)
+          dp[i][j] = (dp[i][j] + dp[l][j - 1] * frac[i - l - 1]) % MOD;
+    }
+    // n >= k
+    // m >= k - 1
+    // dp[n][k] = dp[m][k - 1] * frac(n - m  - 1)
+    return dp[n][k];
   }
 };
 // leetcode submit region end(Prohibit modification and deletion)

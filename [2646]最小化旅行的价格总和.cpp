@@ -56,6 +56,7 @@
 #include <bits/stdc++.h>
 
 //leetcode submit region begin(Prohibit modification and deletion)
+using namespace std;
 class Solution {
 public:
     int minimumTotalPrice(int n, vector<vector<int>>& edges, vector<int>& price, vector<vector<int>>& trips) {
