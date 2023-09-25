@@ -70,108 +70,73 @@
 // Related Topics 树 深度优先搜索 广度优先搜索 设计 哈希表 👍 16 👎 0
 
 
-#include <bits/stdc++.h>
-using namespace std;
-struct TreeNode {
-  int val;
-  TreeNode *left;
-  TreeNode *right;
-  TreeNode() : val(0), left(nullptr), right(nullptr) {}
-  TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-  TreeNode(int x, TreeNode *left, TreeNode *right)
-      : val(x), left(left), right(right) {}
-};
+#include <vector>
+#include <optional>
 
-struct ListNode {
-  int val;
-  ListNode *next;
-  ListNode() : val(0), next(nullptr) {}
-  ListNode(int x) : val(x), next(nullptr) {}
-  ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &o, const std::array<T, N> &v);
-template <typename T, size_t... I>
-void printTupleHelper(const T &tup, std::index_sequence<I...>);
-template <typename... Args>
-std::ostream &operator<<(std::ostream &o, const std::tuple<Args...> &tup);
-template <typename U, typename V>
-std::ostream &operator<<(std::ostream &o, std::pair<U, V> p);
-template <typename U, typename V>
-std::ostream &operator<<(std::ostream &o, std::unordered_map<U, V> p);
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &o, const std::array<T, N> &v);
-
-template <typename T, size_t... I>
-void printTupleHelper(const T &tup, std::index_sequence<I...>) {
-  ((std::cout << (I == 0 ? "" : ", ") << std::get<I>(tup)), ...);
-}
-
-template <typename... Args>
-std::ostream &operator<<(std::ostream &o, const std::tuple<Args...> &tup) {
-  o << "(";
-  printTupleHelper(tup, std::make_index_sequence<sizeof...(Args)>());
-  return o << ")" << std::endl;
-}
-
-template <typename U, typename V>
-std::ostream &operator<<(std::ostream &o, std::pair<U, V> p) {
-  return o << "(" << p.first << ", " << p.second << ")";
-}
-
-template <typename U, typename V>
-std::ostream &operator<<(std::ostream &o, std::unordered_map<U, V> p) {
-  o << "map {";
-  for (const auto &a : p)
-    o << a.first << " : " << a.second << ", ";
-  return o << "}\n";
-}
-
-template <typename T>
-std::ostream &operator<<(std::ostream &o, const std::vector<T> &v) {
-  o << "vector [";
-  for (const auto &a : v)
-    cout << a << ", ";
-  return o << "]";
-}
-
-template <typename T, size_t N>
-std::ostream &operator<<(std::ostream &o, const std::array<T, N> &v) {
-  o << "array [";
-  for (const auto &a : v)
-    cout << a << ", ";
-  return o << "]";
-}
+using std::vector;
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class LockingTree {
-  struct LTNode {
-    bool _is_locked = false;
-    int _par;
-    int _cur_usr;
-
-  };
-  vector<LTNode> nodes;
+private:
+    struct Node {
+        int parent;
+        std::optional<int> locking_user;
+        vector<int> children;
+    };
+    std::vector<Node> _nodes;
 public:
-    LockingTree(vector<int>& parent) {
-
+    LockingTree(vector<int> &parent) {
+        _nodes.reserve(parent.size());
+        for (auto p: parent)
+            _nodes.emplace_back(Node{p, std::nullopt, {}});
+        for (auto iter = parent.begin() + 1; iter != parent.end(); ++iter)
+            _nodes[*iter].children.emplace_back(std::distance(parent.begin(), iter));
     }
-    
+
     bool lock(int num, int user) {
-
-    }
-    
-    bool unlock(int num, int user) {
-      auto& node = nodes[num];
-      if (node._is_locked && node._cur_usr == user) {
-        node._is_locked = false;
+        auto &node = _nodes[num];
+        if (node.locking_user.has_value())
+            return false;
+        node.locking_user = user;
         return true;
-      }
-      return false;
     }
-    
-    bool upgrade(int num, int user) {
 
+    bool unlock(int num, int user) {
+        auto &node = _nodes[num];
+        if (node.locking_user != user)
+            return false;
+        node.locking_user.reset();
+        return true;
+    }
+
+    int unlock_recursive(Node &node) {
+        auto ret = 0;
+        for (auto child_num: node.children) {
+            auto &child = _nodes[child_num];
+            if (child.locking_user.has_value()) {
+                ++ret;
+                child.locking_user.reset();
+            }
+            ret += unlock_recursive(child);
+        }
+        return ret;
+    }
+
+    bool upgrade(int num, int user) {
+        auto &node = _nodes[num];
+        if (node.locking_user.has_value())
+            return false;
+        for (auto cur = node.parent; cur != -1;) {
+            auto &r_node = _nodes[cur];
+            if (r_node.locking_user.has_value())
+                return false;
+            cur = r_node.parent;
+        }
+        auto n_unlocked = unlock_recursive(node);
+        if (n_unlocked == 0)
+            return false;
+        node.locking_user = user;
+        return true;
     }
 };
 

@@ -52,13 +52,57 @@
 // Related Topics 树 图 拓扑排序 数组 👍 34 👎 0
 
 
-#include <bits/stdc++.h>
+#include <vector>
+#include <queue>
+
+using std::vector;
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:
-    int collectTheCoins(vector<int>& coins, vector<vector<int>>& edges) {
-        
+    int collectTheCoins(vector<int> &coins, vector<vector<int>> &edges) {
+        auto const n = coins.size();
+        vector degrees(coins.size(), 0);
+        vector adjs(coins.size(), vector<int>{});
+        for (auto const &edge: edges) {
+            auto u = edge[0], v = edge[1];
+            ++degrees[u], ++degrees[v];
+            adjs[u].emplace_back(v), adjs[v].emplace_back(u);
+        }
+        std::queue<int> q;
+        for (auto i = 0; i < n; ++i)
+            if (degrees[i] == 1 && coins[i] == 0)
+                q.emplace(i);
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            --degrees[cur];
+            for (auto to: adjs[cur])
+                if (--degrees[to] == 1 && coins[to] == 0)
+                    q.emplace(to);
+        }
+
+        for (auto i = 0; i < n; ++i)
+            if (degrees[i] == 1)
+                q.emplace(i);
+        {
+            auto qsz = q.size();
+            for (auto i = 0; i < qsz; ++i) {
+                auto cur = q.front();
+                q.pop();
+                --degrees[cur];
+                for (auto to: adjs[cur])
+                    if (--degrees[to] == 1)
+                        q.emplace(to);
+            }
+        }
+        while (!q.empty()) {
+            auto cur = q.front();
+            q.pop();
+            --degrees[cur];
+        }
+        auto sz = std::count_if(degrees.begin(), degrees.end(),[](int x) {return x > 0;});
+        return std::max(0, ((int) sz - 1) * 2);
     }
 };
 //leetcode submit region end(Prohibit modification and deletion)

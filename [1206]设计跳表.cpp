@@ -58,25 +58,172 @@
 // 
 //
 // Related Topics 设计 链表 👍 255 👎 0
+#include <vector>
+#include <memory>
+#include <random>
 
+using namespace std;
 
 //leetcode submit region begin(Prohibit modification and deletion)
-class Skiplist {
+
+
+template<typename K, typename V>
+class SkipListImpl {
+private:
+    constexpr inline static uint8_t MAX_LEVEL = 32;
+    constexpr inline static int S = 0xFFFF;
+    constexpr inline static int PS = S >> 2;
+    struct SkipListNode;
+    std::unique_ptr<SkipListNode> m_tail, m_head;
+    std::size_t m_length{0};
+    std::uint8_t m_level{0};
+    std::mt19937 m_rng{std::random_device{}()};
+
+
 public:
-    Skiplist() {
+    uint8_t random_level() {
+        uint8_t lv = 1;
+        // MAXL = 32, S = 0xFFFF, PS = S * P, P = 1 / 4
+        while ((m_rng() & S) < PS) ++lv;
+        return std::min(MAX_LEVEL, lv);
+    }
+
+    SkipListImpl() : m_tail{std::make_unique<SkipListNode>(K{}, V{}, 0)},
+                     m_head{std::make_unique<SkipListNode>(K{}, V{}, MAX_LEVEL, m_tail.get())} {
 
     }
-    
+
+    V *find(const K &key) {
+        SkipListNode *p = m_head.get();
+        for (int i = m_level; i >= 0; --i) {
+            while (true) {
+                if (auto nxt = p->forward[i]; nxt != m_tail.get() && nxt->key < key)
+                    p = nxt;
+                else break;
+            }
+        }
+        p = p->forward[0];
+        if (p != m_tail.get() && p->key == key) return &(p->value);
+        return nullptr;
+    }
+
+    template<typename UK = K, typename UV = V>
+    void insert(UK &&key, UV &&value) {
+        // 用于记录需要修改的节点
+        std::vector<SkipListNode *> update(m_level + 1);
+        SkipListNode *p = m_head.get();
+
+        for (int i = m_level; i >= 0; --i) {
+            while (true) {
+                if (auto nxt = p->forward[i]; nxt != m_tail.get() && nxt->key < key)
+                    p = nxt;
+                else break;
+            }
+            update[i] = p;
+        }
+        p = p->forward[0];
+
+        // 若已存在则修改
+//        if (p != m_tail.get() && p->key == key) {
+//            p->value = std::forward<UV>(value);
+//            return;
+//        }
+
+        // 获取新节点的最大层数
+        auto lv = random_level();
+        if (lv > m_level) {
+            lv = ++m_level;
+            update.emplace_back(m_head.get());
+        }
+
+        // 新建节点
+        auto new_node = new SkipListNode(std::forward<UK>(key), std::forward<UV>(value), lv);
+        // 在第 0~lv 层插入新节点
+        for (int i = lv; i >= 0; --i) {
+            p = update[i];
+            new_node->forward[i] = p->forward[i];
+            p->forward[i] = new_node;
+        }
+
+        ++m_length;
+    }
+
+    template<typename UK = K, typename UV = V>
+    bool erase(UK &&key) {
+        // 用于记录需要修改的节点
+        std::vector<SkipListNode *> update(m_level + 1);
+        SkipListNode *p = m_head.get();
+        for (int i = m_level; i >= 0; --i) {
+            while (true) {
+                if (auto nxt = p->forward[i]; nxt != m_tail.get() && nxt->key < key)
+                    p = nxt;
+                else break;
+            }
+            update[i] = p;
+        }
+        p = p->forward[0];
+
+        // 节点不存在
+        if (p == m_tail.get() || p->key != key) return false;
+
+        // 从最底层开始删除
+        for (int i = 0; i <= m_level; ++i) {
+            // 如果这层没有 p 删除就完成了
+            if (update[i]->forward[i] != p)
+                break;
+            // 断开 p 的连接
+            update[i]->forward[i] = p->forward[i];
+        }
+
+        delete p;
+
+        // 删除节点可能导致最大层数减少
+        while (m_level > 0 && m_head->forward[m_level] == m_tail.get()) --m_level;
+
+        // 跳表长度
+        --m_length;
+        return true;
+    }
+
+private:
+
+    struct SkipListNode {
+        uint8_t level;
+        K key;
+        V value;
+        std::unique_ptr<SkipListNode *[]> forward;
+
+        SkipListNode() = delete;
+
+        template<typename UK = K, typename UV = V>
+        SkipListNode(UK &&k, UV &&v, uint8_t l, SkipListNode *nxt = nullptr) : key{std::forward<UK>(k)},
+                                                                               value{std::forward<UV>(v)}, level{l},
+                                                                               forward{std::unique_ptr<SkipListNode *[]>(
+                                                                                       new SkipListNode *[l + 1])} {
+            std::fill(forward.get(), forward.get() + level + 1, nxt);
+        }
+
+    };
+
+};
+
+
+class Skiplist {
+private:
+    SkipListImpl<int, int> ls;
+public:
+    Skiplist() : ls{} {}
+
     bool search(int target) {
-
+        return ls.find(target) != nullptr;
     }
-    
+
     void add(int num) {
-
+        ls.insert(num, num);
     }
-    
-    bool erase(int num) {
 
+    bool erase(int num) {
+        return ls.erase(num);
     }
 };
 
