@@ -54,35 +54,17 @@
 // 
 //
 // Related Topics 数组 分治 👍 46 👎 0
-#include <bits/stdc++.h>
+#include <vector>
+#include <algorithm>
 using namespace std;
 
 //leetcode submit region begin(Prohibit modification and deletion)
-template<typename T>
-std::ostream &operator<<(std::ostream &o, const std::vector<T> &v) {
-  o << "vector [";
-  for (const auto &a : v)
-    cout << a << ", ";
-  return o << "]";
-}
 class Solution {
 public:
     vector<int> recoverArray(int n, vector<int>& sums) {
-      sort(sums.begin(), sums.end());
-      cout << "n="<<n<< " " << sums <<endl;
-      if (n==2) {
-        // 0, a, b, a + b
-        if (sums[0]==0 || sums[3]==0)
-          return {sums[1], sums[2]};
-        return {sums[0], sums[3]};
-        // -a 0 b-a b  or -a b-a 0 b
-      }
-      if (n==1)
-        return {sums[0] == 0 ? sums[1] : sums[0]};
-      int ele = sums.back() - sums[sums.size() / 2 - 1];
-      vector temp(sums.begin(), sums.begin() + sums.size() / 2 );
-      vector ans = recoverArray(n-1, temp);
-      ans.emplace_back(ele);
+        std::sort(sums.begin(), sums.end());
+        vector<int> ans;
+
       return ans;
     }
 };

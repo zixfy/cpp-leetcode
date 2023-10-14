@@ -47,8 +47,7 @@
 //
 //  Related Topics 队列 数组 分治 动态规划 单调队列 👍 606 👎 0
 
-#include <bits/stdc++.h>
-errno
+#include "vector"
 using namespace std;
 // leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
@@ -56,16 +55,6 @@ public:
   int maxSubarraySumCircular(vector<int> &nums) {
     auto const n = nums.size();
     nums.insert(nums.end(), nums.begin(), nums.end());
-    int ans = numeric_limits<int>::min();
-    int l = 0, r = 0;
-    int cur = 0;
-    while (r < nums.size()) {
-      if (r - l + 1 > n)
-        cur -= nums
-
-
-        ++r;
-    }
   }
 };
 // leetcode submit region end(Prohibit modification and deletion)

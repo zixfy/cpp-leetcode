@@ -46,8 +46,8 @@
 // Related Topics 数组 二分查找 排序 👍 240 👎 0
 
 
-#include <bits/stdc++.h>
-
+#include <vector>
+using namespace std;
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:

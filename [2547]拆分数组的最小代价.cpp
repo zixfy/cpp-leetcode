@@ -68,7 +68,23 @@
 // Related Topics 数组 哈希表 动态规划 计数 👍 25 👎 0
 
 
-#include <bits/stdc++.h>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <array>
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
+#include <queue>
+#include <map>
+#include <set>
+#include <iterator>
+
+using u64 = std::uint64_t;
+using i64 = std::int64_t;
+using i8 = std::int8_t;
+using u8 = std::uint8_t;
+
 using namespace std;
 struct TreeNode {
   int val;

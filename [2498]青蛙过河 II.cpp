@@ -52,6 +52,10 @@
 //
 // Related Topics 贪心 数组 二分查找 👍 21 👎 0
 
+#include <vector>
+#include "algorithm"
+#include "iostream"
+using namespace std;
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {

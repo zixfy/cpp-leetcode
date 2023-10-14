@@ -19,13 +19,21 @@
 // Related Topics 数组 双指针 排序 👍 169 👎 0
 
 
-#include <bits/stdc++.h>
+#include <vector>
+using namespace std;
 
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:
     void merge(vector<int>& A, int m, vector<int>& B, int n) {
-
+      int pa = m - 1, pb = n - 1, p = n + m - 1;
+      while (pa >= 0 && pb >= 0) {
+        if (A[pa] > B[pb])
+          A[p--] = A[pa--];
+        else A[p--] = B[pb--];
+      }
+      while (pb >= 0)
+        A[p--] = B[pb--];
     }
 };
 //leetcode submit region end(Prohibit modification and deletion)

@@ -37,8 +37,8 @@
 // Related Topics 数组 数学 数论 排序 堆（优先队列） 👍 16 👎 0
 
 
-#include <bits/stdc++.h>
-using let = std::any;
+#include <vector>
+using namespace std;
 using u64 = std::uint64_t;
 using i64 = std::int64_t;
 using i8 = std::int8_t;

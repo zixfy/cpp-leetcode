@@ -39,12 +39,29 @@
 //
 // Related Topics 数组 哈希表 👍 708 👎 0
 
-
+#include "vector"
+#include <unordered_set>
+using std::vector;
 //leetcode submit region begin(Prohibit modification and deletion)
 class Solution {
 public:
     vector<int> findDuplicates(vector<int>& nums) {
+        vector<int> ans{};
+        auto const n  = nums.size();
+        for (int i = 0; i < n; ++i) {
+            if (nums[i] == i + 1)
+                continue;
+            auto& should = nums[nums[i] - 1];
+            if (should != nums[i]) {
+                std::swap(should, nums[i]);
+                --i;
+                continue;
+            }
+            if (i + 1 < nums[i])
+            ans.emplace_back(should);
+        }
 
+        return ans;
     }
 };
 //leetcode submit region end(Prohibit modification and deletion)
