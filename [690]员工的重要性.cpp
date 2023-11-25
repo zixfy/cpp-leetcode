@@ -28,7 +28,15 @@
 // 
 //
 // Related Topics 深度优先搜索 广度优先搜索 哈希表 👍 281 👎 0
+#include "vector"
+using namespace std;
 
+class Employee {
+public:
+  int id;
+  int importance;
+  vector<int> subordinates;
+};
 
 //leetcode submit region begin(Prohibit modification and deletion)
 /*
@@ -40,11 +48,31 @@ public:
     vector<int> subordinates;
 };
 */
+#include "unordered_map"
+#include "queue"
+using namespace std;
 
 class Solution {
 public:
     int getImportance(vector<Employee*> employees, int id) {
-        
+        using EmployeeById = std::unordered_map<int, Employee*>;
+        EmployeeById employeeById{};
+        for (auto e: employees)
+          employeeById[e->id] = e;
+        int ans = 0;
+        std::queue<Employee *> bfs{};
+        auto root = employeeById[id];
+        bfs.emplace(root);
+        while (not bfs.empty()) {
+          ans += bfs.front()->importance;
+          for (auto to: bfs.front()->subordinates)
+            bfs.push(employeeById[to]);
+          bfs.pop();
+
+        }
+        return ans;
+
+
     }
 };
 //leetcode submit region end(Prohibit modification and deletion)
